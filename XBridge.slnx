@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/native/">
+    <Project Path="native/XBridge.VirtualController.Tests/XBridge.VirtualController.Tests.csproj" />
+    <Project Path="native/XBridge.VirtualController/XBridge.VirtualController.csproj" />
+  </Folder>
+</Solution>

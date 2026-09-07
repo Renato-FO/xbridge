@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+native/**/bin/
+native/**/obj/
+package-lock.json
+codex.md

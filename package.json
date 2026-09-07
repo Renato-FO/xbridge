@@ -1,0 +1,39 @@
+{
+  "name": "xbridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Bridge generic PlayStation-style HID controllers to virtual Xbox 360 controllers on Windows.",
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build:native": "dotnet build native/XBridge.VirtualController -o artifacts/native && dotnet build native/XBridge.VirtualController --no-restore -o artifacts/native-output",
+    "build": "tsc -p tsconfig.build.json && node scripts/copy-static.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "diagnostics": "tsx src/cli/diagnostics.ts",
+    "capture": "tsx src/cli/capture.ts",
+    "electron": "npm run build:native && npm run build && electron ."
+  },
+  "main": "dist/ui/main.js",
+  "dependencies": {
+    "node-hid": "^3.2.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.35.0",
+    "@types/node": "^24.3.1",
+    "@vitest/coverage-v8": "^3.2.4",
+    "electron": "^44.2.0",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2",
+    "typescript-eslint": "^8.42.0",
+    "vitest": "^3.2.4"
+  }
+}

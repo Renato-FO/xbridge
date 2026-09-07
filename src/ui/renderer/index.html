@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'"
+    />
+    <title>XBridge · Controller mapping</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <header>
+      <a class="brand" href="#"><span class="brand-icon">X</span>XBridge</a
+      ><span class="header-page">Controller workspace</span
+      ><span id="output-status" class="output-status">● Xbox output stopped</span>
+      <button id="output-toggle" class="primary">Start Xbox output</button>
+    </header>
+    <main>
+      <div class="page-heading">
+        <div>
+          <p class="eyebrow">CONTROLLER / 01</p>
+          <h1>Make every button yours.</h1>
+          <p class="subtitle">
+            Press a control to test it. Select a control to change its Xbox assignment.
+          </p>
+        </div>
+        <div class="connection">
+          <span id="connection-dot"></span>
+          <div><strong>DualShock 4</strong><small id="status">Connecting…</small></div>
+          <button id="connect">Reconnect</button
+          ><button id="disconnect" class="quiet">Disconnect</button>
+        </div>
+      </div>
+      <div id="notice" role="status" aria-live="polite"></div>
+      <div class="workspace">
+        <div class="visuals">
+          <section class="controller-card">
+            <div class="card-heading">
+              <div>
+                <span class="step">01</span>
+                <h2>Physical controller</h2>
+              </div>
+              <span class="chip">DUALSHOCK 4</span>
+            </div>
+            <div id="physical" class="controller-art"></div>
+            <div class="input-footer">
+              <span id="physical-active">Waiting for controller</span
+              ><span class="live-key"><i></i>Live input</span>
+            </div>
+          </section>
+          <div class="flow-label"><span></span><b>↓ YOUR MAPPING ↓</b><span></span></div>
+          <section class="controller-card xbox-card">
+            <div class="card-heading">
+              <div>
+                <span class="step">02</span>
+                <h2>Mapped controller</h2>
+              </div>
+              <span class="chip">XBOX 360 · PREVIEW</span>
+            </div>
+            <div id="xbox" class="controller-art"></div>
+            <div class="input-footer">
+              <span id="mapped-active">Your mapped controls appear here</span
+              ><span class="preview-key">Preview</span>
+            </div>
+          </section>
+          <div class="meters">
+            <div>
+              <label>Left trigger <strong id="lt-value">0%</strong></label
+              ><meter id="lt" min="0" max="1" value="0"></meter>
+            </div>
+            <div>
+              <label>Right trigger <strong id="rt-value">0%</strong></label
+              ><meter id="rt" min="0" max="1" value="0"></meter>
+            </div>
+            <div>
+              <label>Left stick <strong id="left-value">0.00 / 0.00</strong></label
+              ><small>X / Y · move to test</small>
+            </div>
+            <div>
+              <label>Right stick <strong id="right-value">0.00 / 0.00</strong></label
+              ><small>X / Y · move to test</small>
+            </div>
+          </div>
+        </div>
+        <aside class="mapping-panel">
+          <div class="mapping-heading">
+            <h2>Assignments</h2>
+            <button id="reset" class="quiet">Reset defaults</button>
+          </div>
+          <p class="panel-hint">
+            Select a physical control, then choose its destination here or on the Xbox drawing.
+          </p>
+          <div class="selection">
+            <span id="selected-source">Cross ×</span><span>→</span
+            ><strong id="selected-target">A</strong>
+          </div>
+          <nav id="tabs" aria-label="Control groups"></nav>
+          <div class="column-labels"><span>PHYSICAL INPUT</span><span>XBOX OUTPUT</span></div>
+          <div id="mapping"></div>
+          <div id="conflicts" role="status"></div>
+          <div class="save-area">
+            <p id="saved" role="status">Default layout</p>
+            <button id="save" class="primary">Save layout</button
+            ><small id="layout-hint">Save to apply this layout to Xbox output.</small>
+          </div>
+          <div class="output-controls">
+            <p id="output-detail" role="status">
+              Creates a virtual Xbox 360 controller for games using your saved layout.
+            </p>
+            <small
+              >The physical controller remains visible. Games that read both may receive duplicate
+              input.</small
+            >
+          </div>
+        </aside>
+      </div>
+      <details class="advanced">
+        <summary>Advanced diagnostics</summary>
+        <p>
+          Record labeled input for hardware verification. Live diagrams use the Windows DS4 joystick
+          layout; verify each control here before using a saved layout.
+        </p>
+        <label for="label">Capture label</label
+        ><input id="label" value="neutral" maxlength="64" /><button id="capture">
+          Record 5 seconds
+        </button>
+        <p id="capture-result"></p>
+      </details>
+    </main>
+    <script type="module" src="./renderer.js"></script>
+  </body>
+</html>
