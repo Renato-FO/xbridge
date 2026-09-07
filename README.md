@@ -1,25 +1,87 @@
 # XBridge
 
-XBridge is a Windows application for converting supported PlayStation-style HID controllers into virtual Xbox 360 controllers. Protocol support is developed from real device captures; the project does not assume that generic devices use Sony's official report layout.
+Map a PlayStation-style controller to a virtual Xbox 360 controller for Windows games that use XInput.
+
+XBridge combines a live controller tester, customizable mappings, raw HID capture, and virtual Xbox output in an Electron desktop app, backed by TypeScript and a small C#/.NET bridge. Protocol support is developed from real device captures; generic controllers are not assumed to use Sony's official report layout.
+
+**Status: early development.** The desktop app currently targets one `054C:05C4` gamepad. Bluetooth input and virtual Xbox output have been checked on the development controller. Full physical-control and gameplay verification is pending; other controller models and USB operation are not yet verified.
+
+## Quick start
+
+Install the prerequisites below, then run these commands in PowerShell on Windows:
+
+```powershell
+git clone https://github.com/Renato-FO/xbridge.git
+cd xbridge
+npm ci
+npm run electron
+```
+
+The launch command builds the native bridge and desktop app before opening Electron.
+
+1. Connect your supported controller through Windows and press **PS** to wake it. Use **Reconnect** if needed.
+2. Verify every button, D-pad direction, stick, and trigger against the live drawings.
+3. Select a physical control and choose its Xbox destination from the assignment menu or Xbox drawing.
+4. Click **Save layout**. Unsaved edits only affect the preview; games use the saved layout.
+5. With ViGEmBus installed, click **Start Xbox output**, wait for **Xbox output active**, and open your game.
+
+Click **Stop Xbox output** to remove the virtual controller. Closing the window keeps XBridge running in the tray; choose **Exit** from the tray to quit.
 
 ## Prerequisites
 
 - Windows 10 or 11 x64
 - Node.js 24.x and npm 11.x
 - .NET 8 SDK (the native bridge targets `net8.0`)
+- Git for cloning the repository
+- [ViGEmBus](https://github.com/nefarius/ViGEmBus) installed separately for virtual Xbox output
 
-ViGEmBus and HidHide are not required for the current diagnostic foundation. XBridge will never install or configure drivers without an explicit user action.
+ViGEmBus is not required for diagnostics or the live tester. It is discontinued, and XBridge isolates its output backend to allow future replacement. XBridge does not install or configure drivers or change HidHide settings.
 
 ## Development
 
 ```powershell
-npm install
+npm ci
 npm run typecheck
 npm test
 npm run lint
+npm run build:native
 npm run build
-dotnet test XBridge.slnx
+dotnet test native/XBridge.VirtualController.Tests/XBridge.VirtualController.Tests.csproj
 ```
+
+The direct test-project command works with the .NET 8 SDK. To use `dotnet test XBridge.slnx` instead, use an SDK with `.slnx` support (.NET 9.0.200 or newer). The native bridge still requires the .NET 8 runtime.
+
+After building, run driver-free output and shutdown checks:
+
+```powershell
+node scripts/verify-output.mjs --fake
+node scripts/verify-bridge-safety.mjs
+```
+
+See [virtual output verification](docs/virtual-output.md#verification) for the hardware-dependent check that creates a temporary virtual Xbox controller.
+
+## Distribution
+
+The repository currently provides a source-build workflow. Installer packaging and automated GitHub Releases are not configured. `npm run build` produces compiled desktop files, and `npm run build:native` produces native bridge artifacts; these outputs are not a standalone installer.
+
+XBridge requires Windows APIs and local device access, so GitHub Pages cannot host the application. Use the quick start to run it locally.
+
+## Troubleshooting
+
+| Symptom                                   | What to check                                                                                                                                             |
+| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Controller not detected                   | Wake it with PS, confirm the Windows connection, click **Reconnect**, and run `npm run diagnostics`. The desktop expects exactly one `054C:05C4` gamepad. |
+| Xbox output cannot start                  | Confirm ViGEmBus is installed and the source controller is connected. See [virtual output](docs/virtual-output.md).                                       |
+| Game receives duplicate input             | The physical controller remains visible. Select the virtual Xbox controller in the game if supported.                                                     |
+| Mapping edits do not affect the game      | Click **Save layout** to apply the preview to output.                                                                                                     |
+| App stays active after closing the window | Choose **Exit** from the system tray to stop output and quit.                                                                                             |
+| Native build or launch fails              | Check `dotnet --list-sdks` and `dotnet --list-runtimes` for a compatible SDK and the .NET 8 runtime, then rerun `npm run build:native`.                   |
+
+## Contributing
+
+[Open an issue](https://github.com/Renato-FO/xbridge/issues) with your Windows version, controller VID/PID, connection type, reproduction steps, and relevant error messages. Review raw captures for identifiers before attaching them.
+
+Keep pull requests focused and run the relevant development checks. Protocol changes should be supported by labeled hardware captures rather than assumed report layouts.
 
 ## Read-only HID diagnostics
 
@@ -42,6 +104,8 @@ Some HID metadata, including report sizes and report descriptors, is not exposed
 XBridge provides a live controller tester, saved mappings, raw capture, and real virtual Xbox 360 output through an already-installed ViGEmBus driver. It does not change HidHide settings or install drivers. See [virtual output](docs/virtual-output.md) for operation, verification, and remaining limitations.
 
 ## Raw controller capture
+
+See the [controller capture guide](docs/controller-capture.md) for the full procedure and artifact format.
 
 With exactly one matching controller awake and connected, hold the labeled control state and run:
 
