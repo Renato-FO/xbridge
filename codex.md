@@ -1,5 +1,21 @@
 XBridge
 
+Release requirement: exclusive virtual Xbox input
+
+The final Windows release must include a guided HidHide prerequisite and setup flow. Explain the driver change and request an explicit install/configure action; verify the official installer signature, report elevation/reboot requirements, and never reboot automatically.
+
+While Xbox output is active, games must receive only the virtual Xbox controller for each managed physical controller. Hide only the identified source gamepad, never keyboards, mice, unrelated controllers, or the virtual Xbox device. Keyboard/mouse input remains available; window focus and the game's input-mode selection are separate from controller isolation.
+
+Allow every XBridge executable that reads the physical device, including the native joystick reader and the desktop HID capture process. Preserve existing HidHide application/device entries and polarity; detect incompatible configuration instead of overwriting it.
+
+Verify that virtual output is connected and the allowed reader can access the source before hiding it. Use process-scoped hiding where the installed HidHide version supports it; otherwise provide owned-state tracking, rollback, and a documented recovery path. Restore only XBridge-owned hiding changes on output stop, disconnect, startup failure, exit, and crash recovery. Do not leave a physical controller unusable when XBridge is not running.
+
+Expose isolation status (unavailable, setup required, active, failed) separately from virtual-output status. Do not claim exclusive output merely because an Xbox virtual device exists. Explain any required controller reconnection or game restart.
+
+Release acceptance must verify from an unprivileged, non-allowed observer that the physical gamepad is inaccessible while the XBridge reader continues receiving it and the virtual Xbox remains visible. In Minecraft for Windows, one Cross/A press must assign once, one Options/Start press must toggle the menu once, and L3 plus forward movement must reach Xbox Left Stick plus forward movement without requiring keyboard input. Verify held buttons, both sticks, triggers, reconnect, stop, exit, crash recovery, and preservation of unrelated HidHide settings. Record hardware/transport and observed results; do not mark gameplay acceptance complete from sampled XInput logs alone.
+
+Investigation on 2026-11-10: physical and virtual devices were simultaneously available; sampled logs showed A, Start, and L3 reaching XInput, including four L3 presses with forward movement. The user observed duplicate menu actions and intermittent sprint behavior. Duplicate physical/virtual input is a working hypothesis pending isolation and gameplay verification, not a proven keyboard/focus defect. HidHide integration is required for release and is not yet implemented in the application.
+
 Project objective
 
 Build a lightweight Windows application that converts generic PlayStation-style controllers into virtual Xbox 360 controllers so they work in games that support XInput.

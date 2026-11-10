@@ -101,6 +101,8 @@ Some HID metadata, including report sizes and report descriptors, is not exposed
 
 ## Current scope
 
+Exclusive Xbox input is a final-release requirement: see [input isolation setup, recovery, and acceptance](docs/input-isolation.md) and `codex.md`. Guided HidHide installation and automatic hiding lifecycle are not implemented in the app yet; installing the driver alone does not complete this feature.
+
 XBridge provides a live controller tester, saved mappings, raw capture, and real virtual Xbox 360 output through an already-installed ViGEmBus driver. It does not change HidHide settings or install drivers. See [virtual output](docs/virtual-output.md) for operation, verification, and remaining limitations.
 
 ## Raw controller capture
