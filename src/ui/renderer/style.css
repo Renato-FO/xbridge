@@ -732,16 +732,22 @@ body[data-mode="test"] .only-map {
 }
 
 /* ---------- Controller SVG ---------- */
-.controller .shell {
-  fill: var(--shell);
-  filter: var(--drop);
-  stroke: #353c45;
-  stroke-width: 1.2;
+.floor-shadow {
+  fill: #000;
+  opacity: 0.7;
 }
-.controller .shell-sheen {
+.controller .shell-overlay {
+  pointer-events: none;
+}
+.controller .shell-rim {
   fill: none;
-  stroke: rgba(255, 255, 255, 0.05);
-  stroke-width: 6;
+  stroke-width: 1.6;
+  pointer-events: none;
+}
+.seam {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.45);
+  stroke-width: 1.5;
   stroke-linecap: round;
 }
 .pad-control {
@@ -752,183 +758,217 @@ body[data-mode="test"] .only-map {
   cursor: pointer;
 }
 .pad-control .key {
-  fill: #15181d;
-  stroke: #3a414b;
+  stroke: #050608;
   stroke-width: 1.4;
   transition:
-    fill 0.06s,
-    stroke 0.06s;
+    stroke 0.06s,
+    opacity 0.06s;
 }
 .pad-control.shoulder .key {
-  fill: #1b1f25;
+  stroke: #07080a;
+}
+.edge-light {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.14);
+  stroke-width: 1.5;
+  stroke-linecap: round;
 }
 .key-label {
   font:
-    600 15px "Segoe UI",
+    600 13px "Segoe UI",
     sans-serif;
-  fill: #9aa5b2;
+  fill: #8c96a2;
   text-anchor: middle;
   pointer-events: none;
 }
 .key-label.small {
-  font-size: 12px;
-}
-.key-label.tiny {
-  font-size: 9px;
-  letter-spacing: 1.5px;
-  font-weight: 500;
-  fill: #6f7a87;
+  font-size: 11px;
 }
 .micro-label {
   font:
-    500 7px "Segoe UI",
+    600 6.5px "Segoe UI",
     sans-serif;
-  letter-spacing: 1px;
-  fill: #6f7a87;
+  letter-spacing: 0.8px;
+  fill: #7a8490;
   text-anchor: middle;
 }
+.well {
+  stroke: rgba(255, 255, 255, 0.05);
+  stroke-width: 1;
+}
+.face-well {
+  opacity: 0.55;
+}
 .touchpad {
-  fill: #121519 !important;
+  stroke: #050608 !important;
+}
+.touchpad-sheen {
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 1;
+  pointer-events: none;
 }
 .lightbar {
-  stroke: #3f8ff0;
-  stroke-width: 3;
+  stroke: #8cc4ff;
+  stroke-width: 2;
   stroke-linecap: round;
-  filter: var(--glow);
-  opacity: 0.85;
+  pointer-events: none;
 }
-.speaker circle {
-  fill: #050607;
+.lightbar-glow {
+  stroke: #2f86ff;
+  stroke-width: 12;
+  stroke-linecap: round;
+  pointer-events: none;
 }
-.dpad-well {
-  fill: #0e1114;
-  stroke: #262c33;
-}
-.dpad-center {
-  fill: #15181d;
+.grille circle {
+  fill: #040506;
+  stroke: rgba(255, 255, 255, 0.06);
+  stroke-width: 0.5;
 }
 .dpad-arm {
-  stroke-width: 1 !important;
+  stroke-width: 1.2 !important;
 }
 .dpad-arrow {
-  fill: #59636f;
+  fill: #0a0b0d;
+  opacity: 0.8;
 }
-.stick-well {
-  fill: #0a0c0f;
-  stroke: #262c33;
-  stroke-width: 1.5;
-}
-.stick-ring {
-  fill: #121519;
-  stroke: #2b3139;
+.stick-shadow {
+  fill: #000;
+  opacity: 0.8;
 }
 .stick-cap {
-  fill: var(--cap);
-  stroke: #3d444d;
+  stroke: #050608;
   stroke-width: 1.4;
 }
-.stick-dimple {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.06);
+.stick-knurl {
+  stroke: rgba(255, 255, 255, 0.07);
   stroke-width: 2;
+  stroke-linecap: round;
 }
-.face .key {
-  fill: #121519;
-  stroke: #3a414b;
+.stick-dish {
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+.button-shadow {
+  fill: #000;
+  opacity: 0.6;
+}
+.face-gloss {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.16);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  pointer-events: none;
 }
 .glyph {
   fill: none;
   stroke-width: 2.4;
   stroke-linecap: round;
   stroke-linejoin: round;
+  filter: drop-shadow(0 0 3px currentColor);
 }
 .face-cross .glyph {
   stroke: var(--ps-cross);
+  color: rgba(122, 167, 255, 0.5);
 }
 .face-circle .glyph {
   stroke: var(--ps-circle);
+  color: rgba(255, 107, 120, 0.5);
 }
 .face-square .glyph {
   stroke: var(--ps-square);
+  color: rgba(231, 138, 215, 0.5);
 }
 .face-triangle .glyph {
   stroke: var(--ps-triangle);
+  color: rgba(63, 211, 176, 0.5);
+}
+.ps-mark {
+  font:
+    italic 800 9.5px "Segoe UI",
+    sans-serif;
+  fill: #b4bcc6;
+  text-anchor: middle;
+  pointer-events: none;
 }
 .face-letter {
   font:
-    700 19px "Segoe UI",
+    700 20px "Segoe UI",
     sans-serif;
   text-anchor: middle;
   pointer-events: none;
-  stroke: rgba(0, 0, 0, 0.35);
-  stroke-width: 0.6;
 }
 .face-a .face-letter {
   fill: var(--xb-a);
+  filter: drop-shadow(0 0 3px rgba(92, 201, 60, 0.6));
 }
 .face-b .face-letter {
   fill: var(--xb-b);
+  filter: drop-shadow(0 0 3px rgba(238, 75, 75, 0.6));
 }
 .face-x .face-letter {
   fill: var(--xb-x);
+  filter: drop-shadow(0 0 3px rgba(63, 143, 240, 0.6));
 }
 .face-y .face-letter {
   fill: var(--xb-y);
-}
-.art-xbox .face .key {
-  fill: #0f1215;
+  filter: drop-shadow(0 0 3px rgba(242, 194, 48, 0.6));
 }
 .guide-ring {
-  fill: #0c0e11;
-  stroke: rgba(92, 201, 60, 0.55);
-  stroke-width: 2;
+  fill: none;
+  stroke: #6fe14a;
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 4px rgba(111, 225, 74, 0.8));
+  pointer-events: none;
 }
-.guide {
-  fill: #c9d1d9 !important;
-  stroke: #e6ecf1 !important;
+.guide-core {
+  fill: none;
+  stroke: rgba(0, 0, 0, 0.15);
+  stroke-width: 1;
 }
 .guide-x {
   fill: none;
-  stroke: #1a1f24;
-  stroke-width: 2.6;
+  stroke: #3d9a35;
+  stroke-width: 3;
   stroke-linecap: round;
 }
 .glyph-sm {
   fill: none;
-  stroke: #8b96a3;
+  stroke: #9aa4b0;
   stroke-width: 1.6;
   stroke-linecap: round;
   stroke-linejoin: round;
+  pointer-events: none;
 }
 /* Hover / focus / selected / pressed */
 .pad-control[role="button"]:hover .key,
-.pad-control[role="button"]:focus-visible .key,
-.pad-control[role="button"]:hover .stick-well,
-.pad-control[role="button"]:focus-visible .stick-well {
+.pad-control[role="button"]:focus-visible .key {
   stroke: var(--accent-line);
   stroke-width: 2;
 }
-.pad-control.selected .key,
-.pad-control.selected .stick-well {
+.pad-control.selected .key {
   stroke: var(--accent);
   stroke-width: 3;
   filter: var(--glow);
 }
-.pad-control.active .key,
-.pad-control.active .stick-well {
+.pad-control.active .key {
   stroke: var(--accent);
   stroke-width: 3.5;
   filter: var(--glow);
 }
-.pad-control.active:not(.face):not(.stick) .key:not(.guide) {
-  fill: #33461a;
+.pad-control.active.shoulder .key,
+.pad-control.active.dpad .key,
+.pad-control.active.touch .key {
+  opacity: 0.85;
 }
 .pad-control.active .stick-cap {
   stroke: var(--accent);
+  stroke-width: 2;
 }
 .pad-control.active .key-label,
 .pad-control.active .dpad-arrow {
   fill: var(--accent);
+  opacity: 1;
 }
 .callout-line {
   fill: none;

@@ -9,7 +9,13 @@ import {
   type MonitorState,
   type Output,
 } from "../contracts.js";
-import { artViewBox, controlAnchor, controllerArt, type ArtKind } from "./controller-art.js";
+import {
+  artViewBox,
+  calloutBounds,
+  controlAnchor,
+  controllerArt,
+  type ArtKind,
+} from "./controller-art.js";
 declare global {
   interface Window {
     xbridge: DesktopApi;
@@ -181,12 +187,15 @@ function placeCallout(kind: ArtKind, control: string | undefined, text: string) 
     return;
   }
   callout.removeAttribute("hidden");
-  const width = Math.round(28 + text.length * 8.8),
+  const width = Math.round(28 + text.length * 8.4),
     height = 36;
   const right = anchor.x >= artViewBox.width / 2;
   const boxX = right
-    ? Math.min(artViewBox.width - width - 2, Math.max(anchor.x + anchor.r + 60, 650))
-    : Math.max(2, Math.min(anchor.x - anchor.r - 60 - width, 130 - width));
+    ? Math.min(
+        artViewBox.width - width - 2,
+        Math.max(anchor.x + anchor.r + 50, calloutBounds.right),
+      )
+    : Math.max(2, Math.min(anchor.x - anchor.r - 50 - width, calloutBounds.left - width));
   const boxY = Math.min(artViewBox.height - height - 4, Math.max(4, anchor.y + 28 - height / 2));
   const midY = boxY + height / 2;
   const edgeX = right ? boxX : boxX + width;
