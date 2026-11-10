@@ -9,13 +9,7 @@ import {
   type MonitorState,
   type Output,
 } from "../contracts.js";
-import {
-  artViewBox,
-  calloutBounds,
-  controlAnchor,
-  controllerArt,
-  type ArtKind,
-} from "./controller-art.js";
+import { artSpec, controlAnchor, decorateArt, moveStick, type ArtKind } from "./controller-art.js";
 declare global {
   interface Window {
     xbridge: DesktopApi;
@@ -174,12 +168,11 @@ async function action(work: () => Promise<unknown>) {
 }
 
 /* ---------- Art & callouts ---------- */
-element("physical").innerHTML = controllerArt("physical");
-element("xbox").innerHTML = controllerArt("xbox");
+decorateArt(element("physical"), "physical", true);
+decorateArt(element("xbox"), "xbox", false);
 
 function placeCallout(kind: ArtKind, control: string | undefined, text: string) {
-  const host = element(kind === "xbox" ? "xbox" : "physical");
-  const callout = host.querySelector<SVGGElement>(".callout");
+  const callout = element(kind).querySelector<SVGGElement>(".callout");
   if (!callout) return;
   const anchor = control === undefined ? undefined : controlAnchor(kind, control);
   if (!anchor) {
@@ -187,21 +180,25 @@ function placeCallout(kind: ArtKind, control: string | undefined, text: string) 
     return;
   }
   callout.removeAttribute("hidden");
-  const width = Math.round(28 + text.length * 8.4),
-    height = 36;
-  const right = anchor.x >= artViewBox.width / 2;
+  const { viewBox, body, unit } = artSpec(kind);
+  const width = Math.round((28 + text.length * 8.4) * unit),
+    height = 36 * unit;
+  const right = anchor.x >= body.left + (body.right - body.left) / 2;
+  const reach = (anchor.rect ? anchor.rect.w / 2 : anchor.r) + 40 * unit;
+  const minX = viewBox.x + 2 * unit,
+    maxX = viewBox.x + viewBox.width - width - 2 * unit;
   const boxX = right
-    ? Math.min(
-        artViewBox.width - width - 2,
-        Math.max(anchor.x + anchor.r + 50, calloutBounds.right),
-      )
-    : Math.max(2, Math.min(anchor.x - anchor.r - 50 - width, calloutBounds.left - width));
-  const boxY = Math.min(artViewBox.height - height - 4, Math.max(4, anchor.y + 28 - height / 2));
+    ? Math.min(maxX, Math.max(anchor.x + reach, body.right))
+    : Math.max(minX, Math.min(anchor.x - reach - width, body.left - width));
+  const boxY = Math.min(
+    viewBox.y + viewBox.height - height - 4 * unit,
+    Math.max(viewBox.y + 4 * unit, anchor.y + anchor.r * 0.9 - height / 2),
+  );
   const midY = boxY + height / 2;
   const edgeX = right ? boxX : boxX + width;
-  const startX = anchor.x + (right ? 1 : -1) * anchor.r * 0.75,
-    startY = anchor.y + anchor.r * 0.65;
-  const elbowX = edgeX + (right ? -26 : 26);
+  const startX = anchor.x + (right ? 1 : -1) * anchor.r * 0.72,
+    startY = anchor.y + anchor.r * 0.7;
+  const elbowX = edgeX + (right ? -26 : 26) * unit;
   callout
     .querySelector(".callout-line")
     ?.setAttribute(
@@ -214,7 +211,7 @@ function placeCallout(kind: ArtKind, control: string | undefined, text: string) 
   box?.setAttribute("width", String(width));
   box?.setAttribute("height", String(height));
   const caption = callout.querySelector(".callout-text");
-  caption?.setAttribute("x", String(boxX + 14));
+  caption?.setAttribute("x", String(boxX + 14 * unit));
   caption?.setAttribute("y", String(midY));
   if (caption) caption.textContent = text;
 }
@@ -412,13 +409,9 @@ function draw(side: ArtKind, values: ControlValues) {
     .forEach((node) => {
       node.classList.toggle("active", (values[node.dataset["control"] ?? ""] ?? 0) > 0.15);
     });
-  for (const stick of ["left", "right"]) {
+  for (const stick of ["left", "right"] as const) {
     const prefix = stick === "left" ? "Left" : "Right";
-    const x = values[`${prefix} X`] ?? 0,
-      y = values[`${prefix} Y`] ?? 0;
-    element(side)
-      .querySelector(`[data-stick="${stick}"]`)
-      ?.setAttribute("transform", `translate(${String(x * 12)} ${String(y * 12)})`);
+    moveStick(side, stick, values[`${prefix} X`] ?? 0, values[`${prefix} Y`] ?? 0);
   }
 }
 function drawStick(id: string, values: ControlValues, prefix: string) {
