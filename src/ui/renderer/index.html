@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -7,131 +7,345 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'"
     />
-    <title>XBridge · Controller mapping</title>
+    <title>XBridge</title>
     <link rel="stylesheet" href="./style.css" />
   </head>
-  <body>
-    <header>
-      <a class="brand" href="#"><span class="brand-icon">X</span>XBridge</a
-      ><span class="header-page">Controller workspace</span
-      ><span id="output-status" class="output-status">● Xbox output stopped</span>
-      <button id="output-toggle" class="primary">Start Xbox output</button>
+  <body data-view="controller" data-mode="map">
+    <header class="topbar">
+      <div class="brand"><span class="brand-icon">X</span>XBridge</div>
+      <nav class="main-nav" aria-label="Seções">
+        <button class="nav-item current" data-view-target="controller" aria-pressed="true">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.95 3.38l-.9 5.84A3 3 0 0 0 7 16.6L9 15h6l2 1.6a3 3 0 0 0 5.15-2.38l-.9-5.84A4 4 0 0 0 17.3 5Z"
+            />
+          </svg>
+          Controle
+        </button>
+        <button class="nav-item" disabled title="Múltiplos perfis chegam em breve">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m12 3 9 5-9 5-9-5 9-5ZM3 13l9 5 9-5M3 17l9 5 9-5" />
+          </svg>
+          Perfis
+        </button>
+        <button class="nav-item" data-view-target="settings" aria-pressed="false">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"
+            />
+          </svg>
+          Configurações
+        </button>
+      </nav>
+      <button
+        class="icon-button help"
+        data-view-target="settings"
+        title="Ajuda e diagnóstico"
+        aria-label="Ajuda e diagnóstico"
+      >
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" />
+          <path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01" />
+        </svg>
+      </button>
     </header>
+
     <main>
-      <div class="page-heading">
+      <div class="hero">
         <div>
-          <p id="eyebrow" class="eyebrow">CONTROLLER / 01</p>
-          <h1>Make every button yours.</h1>
-          <p class="subtitle">
-            Press a control to test it. Select a control to change its Xbox assignment.
-          </p>
+          <h1>Seu controle. Do seu jeito.</h1>
+          <p class="subtitle">Conecte, personalize e jogue.</p>
         </div>
-        <div class="connection">
-          <span id="connection-dot"></span>
-          <div>
-            <strong id="controller-name">DualShock 4</strong><small id="status">Connecting…</small>
-          </div>
-          <button id="connect">Reconnect</button
-          ><button id="disconnect" class="quiet">Disconnect</button>
+        <div class="profile-picker" title="Múltiplos perfis chegam em breve">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m12 3 9 5-9 5-9-5 9-5ZM3 13l9 5 9-5M3 17l9 5 9-5" />
+          </svg>
+          <span>Perfil padrão</span>
+          <svg class="icon chevron" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="m6 9 6 6 6-6" />
+          </svg>
         </div>
       </div>
-      <nav id="controller-tabs" aria-label="Connected controllers" hidden></nav>
-      <div id="notice" role="status" aria-live="polite"></div>
-      <div class="workspace">
-        <div class="visuals">
-          <section class="controller-card">
-            <div class="card-heading">
-              <div>
-                <span class="step">01</span>
-                <h2>Physical controller</h2>
-              </div>
-              <span class="chip">DUALSHOCK 4</span>
-            </div>
-            <div id="physical" class="controller-art"></div>
-            <div class="input-footer">
-              <span id="physical-active">Waiting for controller</span
-              ><span class="live-key"><i></i>Live input</span>
-            </div>
-          </section>
-          <div class="flow-label"><span></span><b>↓ YOUR MAPPING ↓</b><span></span></div>
-          <section class="controller-card xbox-card">
-            <div class="card-heading">
-              <div>
-                <span class="step">02</span>
-                <h2>Mapped controller</h2>
-              </div>
-              <span class="chip">XBOX 360 · PREVIEW</span>
-            </div>
-            <div id="xbox" class="controller-art"></div>
-            <div class="input-footer">
-              <span id="mapped-active">Your mapped controls appear here</span
-              ><span class="preview-key">Preview</span>
-            </div>
-          </section>
-          <div class="meters">
-            <div>
-              <label>Left trigger <strong id="lt-value">0%</strong></label
-              ><meter id="lt" min="0" max="1" value="0"></meter>
-            </div>
-            <div>
-              <label>Right trigger <strong id="rt-value">0%</strong></label
-              ><meter id="rt" min="0" max="1" value="0"></meter>
-            </div>
-            <div>
-              <label>Left stick <strong id="left-value">0.00 / 0.00</strong></label
-              ><small>X / Y · move to test</small>
-            </div>
-            <div>
-              <label>Right stick <strong id="right-value">0.00 / 0.00</strong></label
-              ><small>X / Y · move to test</small>
-            </div>
-          </div>
+
+      <section class="link-bar" aria-label="Conexões">
+        <div class="device">
+          <svg class="device-icon" viewBox="0 0 64 40" aria-hidden="true">
+            <path
+              d="M18 6h28c6 0 9 3 11 10l5 15c1 5-3 8-7 6l-8-7H17l-8 7c-4 2-8-1-7-6l5-15C9 9 12 6 18 6Z"
+            />
+            <circle cx="22" cy="24" r="4" />
+            <circle cx="42" cy="24" r="4" />
+          </svg>
+          <strong id="device-name">DualShock 4</strong>
+          <span id="status" class="state-text">Conectando…</span>
+          <span class="device-actions">
+            <button id="connect" class="link-button">Reconectar</button>
+            <button id="disconnect" class="link-button">Desconectar</button>
+          </span>
         </div>
-        <aside class="mapping-panel">
-          <div class="mapping-heading">
-            <h2>Assignments</h2>
-            <button id="reset" class="quiet">Reset defaults</button>
-          </div>
-          <p class="panel-hint">
-            Select a physical control, then choose its destination here or on the Xbox drawing.
-          </p>
-          <div class="selection">
-            <span id="selected-source">Cross ×</span><span>→</span
-            ><strong id="selected-target">A</strong>
-          </div>
-          <nav id="tabs" aria-label="Control groups"></nav>
-          <div class="column-labels"><span>PHYSICAL INPUT</span><span>XBOX OUTPUT</span></div>
-          <div id="mapping"></div>
-          <div id="conflicts" role="status"></div>
-          <div class="save-area">
-            <p id="saved" role="status">Default layout</p>
-            <button id="save" class="primary">Save layout</button
-            ><small id="layout-hint">Save to apply this layout to Xbox output.</small>
-          </div>
-          <div class="output-controls">
-            <p id="output-detail" role="status">
-              Creates a virtual Xbox 360 controller for games using your saved layout.
-            </p>
-            <small
-              >The physical controller remains visible. Games that read both may receive duplicate
-              input.</small
+        <svg class="flow-arrow icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 12h16m-6-6 6 6-6 6" />
+        </svg>
+        <div class="device virtual">
+          <svg class="xbox-logo" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M6.5 6.5Q12 11 17.5 17.5M17.5 6.5Q12 11 6.5 17.5" />
+          </svg>
+          <div class="virtual-text">
+            <strong>Xbox 360 virtual</strong>
+            <small id="output-detail" role="status"
+              >Cria um controle Xbox 360 virtual para os jogos usando o perfil salvo.</small
             >
           </div>
-        </aside>
-      </div>
-      <details class="advanced">
-        <summary>Advanced diagnostics</summary>
-        <p>
-          Record labeled input for hardware verification. Live diagrams use the Windows DS4 joystick
-          layout; verify each control here before using a saved layout.
-        </p>
-        <label for="label">Capture label</label
-        ><input id="label" value="neutral" maxlength="64" /><button id="capture">
-          Record 5 seconds
+          <span id="output-status" class="pill">Saída desativada</span>
+          <!-- Reserved for HidHide input isolation status (see docs/input-isolation.md). -->
+          <span id="isolation-status" class="pill" hidden></span>
+        </div>
+        <button id="output-toggle" class="primary output-button">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path class="icon-play" d="M7 4.5v15l12-7.5-12-7.5Z" />
+            <rect class="icon-stop" x="5" y="5" width="14" height="14" rx="2" />
+          </svg>
+          <span id="output-toggle-label">Ativar saída Xbox</span>
         </button>
-        <p id="capture-result"></p>
-      </details>
+      </section>
+
+      <!-- Shown only while two or more controllers are connected. -->
+      <nav
+        id="controller-tabs"
+        class="controller-tabs"
+        aria-label="Controles conectados"
+        hidden
+      ></nav>
+
+      <div id="notice" role="status" aria-live="polite"></div>
+
+      <div class="view view-controller">
+        <div class="workspace">
+          <div class="main-column">
+            <section class="card stage">
+              <div class="stage-header">
+                <div class="mode-tabs" role="tablist" aria-label="Modo">
+                  <button class="mode-tab current" data-mode-target="map" role="tab">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4" />
+                    </svg>
+                    Mapeamento
+                  </button>
+                  <button class="mode-tab" data-mode-target="test" role="tab">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M3 12h4l3-8 4 16 3-8h4" />
+                    </svg>
+                    Teste de entrada
+                  </button>
+                </div>
+                <p class="stage-hint only-map">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 16v-4M12 8h.01" />
+                  </svg>
+                  Clique em um botão para remapear.
+                </p>
+                <p class="stage-hint only-test">
+                  <span class="xbox-mini">
+                    <svg class="xbox-logo" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="12" cy="12" r="10" />
+                      <path d="M6.5 6.5Q12 11 17.5 17.5M17.5 6.5Q12 11 6.5 17.5" />
+                    </svg>
+                    Xbox 360 virtual
+                  </span>
+                  <span class="pill live-pill">Ao vivo</span>
+                </p>
+              </div>
+              <p class="stage-subhint only-test">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 16v-4M12 8h.01" />
+                </svg>
+                Pressione os botões para testar.
+              </p>
+              <div id="physical" class="controller-art only-map"><!--art:physical--></div>
+              <div id="xbox" class="controller-art only-test"><!--art:xbox--></div>
+              <div class="stage-footer only-map">
+                <span class="footer-label">Mapeamento atual</span>
+                <div id="mapping-chips" class="chips"></div>
+              </div>
+              <div class="stage-footer test-chips only-test">
+                <span class="chip wide"
+                  ><span id="test-last-badge" class="badge badge-none">–</span
+                  ><span id="test-last">Nenhum botão</span></span
+                >
+                <span class="chip"
+                  ><span class="badge badge-tag">LT</span><span id="test-lt">0%</span></span
+                >
+                <span class="chip"
+                  ><span class="badge badge-tag">RT</span><span id="test-rt">0%</span></span
+                >
+                <span class="chip"
+                  ><i id="test-connection-dot" class="dot"></i
+                  ><span id="test-connection">Desconectado</span></span
+                >
+              </div>
+            </section>
+
+            <section class="card monitor">
+              <div class="card-title">
+                <h2>
+                  <svg class="icon accent" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 12h4l3-8 4 16 3-8h4" />
+                  </svg>
+                  Monitor de entrada
+                </h2>
+                <span id="monitor-live" class="pill">Sem entrada</span>
+              </div>
+              <div class="monitor-grid">
+                <div class="stick-readout">
+                  <div class="stick-pad"><i id="left-dot"></i></div>
+                  <div>
+                    <span class="readout-label">Analógico<br />esquerdo</span>
+                    <span class="readout-values" id="left-value">X: 0% &nbsp; Y: 0%</span>
+                  </div>
+                </div>
+                <div class="stick-readout">
+                  <div class="stick-pad"><i id="right-dot"></i></div>
+                  <div>
+                    <span class="readout-label">Analógico<br />direito</span>
+                    <span class="readout-values" id="right-value">X: 0% &nbsp; Y: 0%</span>
+                  </div>
+                </div>
+                <div class="trigger-readout">
+                  <div class="bar-row">
+                    <span>L2</span><span class="bar"><i id="l2-bar"></i></span
+                    ><strong id="l2-value">0%</strong>
+                  </div>
+                  <div class="bar-row">
+                    <span>R2</span><span class="bar"><i id="r2-bar"></i></span
+                    ><strong id="r2-value">0%</strong>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="card side-panel">
+            <div class="only-map panel-body">
+              <div class="card-title">
+                <h2>
+                  <svg class="icon accent" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M4 8h16m-4-4 4 4-4 4M20 16H4m4-4-4 4 4 4" />
+                  </svg>
+                  Remapear botão
+                </h2>
+              </div>
+              <div class="selection">
+                <span id="selected-source" class="selection-source">Cross ×</span>
+                <svg class="icon arrow" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 12h16m-6-6 6 6-6 6" />
+                </svg>
+                <span class="target">
+                  <span id="selected-badge" class="badge">A</span>
+                  <select
+                    id="selected-target"
+                    aria-label="Destino Xbox do controle selecionado"
+                  ></select>
+                </span>
+              </div>
+              <nav id="tabs" class="group-tabs" aria-label="Grupos de controles"></nav>
+              <div id="mapping" class="mapping-list"></div>
+              <div id="conflicts" role="status"></div>
+              <button id="reset" class="link-button reset">
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5" />
+                </svg>
+                Restaurar padrão
+              </button>
+              <div class="save-area">
+                <div class="save-status">
+                  <p id="saved" role="status"><i class="dot"></i><span>Perfil padrão</span></p>
+                  <small id="layout-hint">Salve para aplicar o perfil à saída Xbox.</small>
+                </div>
+                <button id="save" class="primary">
+                  <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 3h11l5 5v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" />
+                    <path d="M7 3v5h8M7 21v-7h10v7" />
+                  </svg>
+                  Salvar perfil
+                </button>
+              </div>
+            </div>
+
+            <div class="only-test panel-body">
+              <div class="card-title">
+                <h2>
+                  <svg class="icon accent" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M3 12h4l3-8 4 16 3-8h4" />
+                  </svg>
+                  Resposta em tempo real
+                </h2>
+              </div>
+              <p class="panel-subtitle">Comandos enviados ao Xbox virtual.</p>
+              <h3>Botões</h3>
+              <div id="response-buttons" class="response-grid"></div>
+              <h3>Gatilhos</h3>
+              <div class="bar-row">
+                <span>LT</span><span class="bar"><i id="lt-bar"></i></span
+                ><strong id="lt-value">0%</strong>
+              </div>
+              <div class="bar-row">
+                <span>RT</span><span class="bar"><i id="rt-bar"></i></span
+                ><strong id="rt-value">0%</strong>
+              </div>
+              <h3>Último comando</h3>
+              <div class="last-command">
+                <span id="last-badge" class="badge badge-none big">–</span>
+                <div>
+                  <strong id="last-command">Nenhum comando ainda</strong>
+                  <small id="last-time">Pressione um botão no controle físico.</small>
+                </div>
+              </div>
+              <p class="duplicate-hint">
+                O controle físico continua visível para o Windows. Jogos que leem os dois podem
+                receber entrada duplicada.
+              </p>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      <div class="view view-settings">
+        <section class="card settings-card">
+          <div class="card-title">
+            <h2>Diagnóstico avançado</h2>
+          </div>
+          <p>
+            Grave entradas rotuladas para verificação de hardware. Os desenhos ao vivo usam o layout
+            de joystick DS4 do Windows; confira cada controle aqui antes de usar um perfil salvo.
+          </p>
+          <div class="capture-row">
+            <label for="label">Rótulo da captura</label>
+            <input id="label" value="neutral" maxlength="64" />
+            <button id="capture">Gravar 5 segundos</button>
+          </div>
+          <p id="capture-result" class="capture-result"></p>
+        </section>
+      </div>
     </main>
+
+    <footer class="statusbar">
+      <span class="status-item"
+        ><svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M6 11h4M8 9v4M15 12h.01M18 10h.01M17.3 5H6.7a4 4 0 0 0-3.95 3.38l-.9 5.84A3 3 0 0 0 7 16.6L9 15h6l2 1.6a3 3 0 0 0 5.15-2.38l-.9-5.84A4 4 0 0 0 17.3 5Z"
+          /></svg
+        ><i id="connection-dot" class="dot"></i
+        ><span id="footer-input">Controle desconectado</span></span
+      >
+      <span class="status-item"
+        ><i id="footer-output-dot" class="dot"></i
+        ><span id="footer-output">Saída Xbox desativada</span></span
+      >
+    </footer>
     <script type="module" src="./renderer.js"></script>
   </body>
 </html>
