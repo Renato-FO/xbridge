@@ -19,8 +19,8 @@ function createWindow(): BrowserWindow {
   const window = new BrowserWindow({
     width: 1450,
     height: 950,
-    minWidth: 850,
-    minHeight: 700,
+    minWidth: 360,
+    minHeight: 480,
     show: false,
     webPreferences: {
       contextIsolation: true,

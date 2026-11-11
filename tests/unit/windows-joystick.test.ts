@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { decodeWindowsJoystick, mapPreview } from "../../src/devices/windows-joystick.js";
+import {
+  decodeWindowsJoystick,
+  decodeWindowsJoysticks,
+  mapPreview,
+} from "../../src/devices/windows-joystick.js";
 import { controls, defaultMapping, validateMapping } from "../../src/ui/contracts.js";
 const neutral = { connected: true, buttons: 0, pov: 65535, axes: [0.5, 0.5, 0.5, 0.5, 0, 0] };
 describe("Windows joystick preview", () => {
@@ -95,5 +99,36 @@ describe("Windows joystick preview", () => {
   });
   it("rejects analog axis assignments to buttons", () => {
     expect(() => validateMapping({ ...defaultMapping, "Left X": "A" })).toThrow();
+  });
+});
+describe("multiple Windows joysticks", () => {
+  it("decodes every connected controller by its joystick ID", () => {
+    const inputs = decodeWindowsJoysticks({
+      controllers: [
+        { ...neutral, id: 0, buttons: 2 },
+        { ...neutral, id: 3, buttons: 4 },
+      ],
+    });
+    expect(inputs.map((controller) => controller.id)).toEqual([0, 3]);
+    expect(inputs[0]?.input["Cross"]).toBe(1);
+    expect(inputs[1]?.input["Circle"]).toBe(1);
+    expect(decodeWindowsJoysticks({ controllers: [] })).toEqual([]);
+  });
+  it("rejects malformed lists, duplicate IDs and out-of-range IDs", () => {
+    for (const value of [
+      null,
+      {},
+      { controllers: {} },
+      { controllers: [{ ...neutral }] },
+      { controllers: [{ ...neutral, id: 16 }] },
+      { controllers: [{ ...neutral, id: 1.5 }] },
+      {
+        controllers: [
+          { ...neutral, id: 1 },
+          { ...neutral, id: 1 },
+        ],
+      },
+    ])
+      expect(() => decodeWindowsJoysticks(value)).toThrow();
   });
 });

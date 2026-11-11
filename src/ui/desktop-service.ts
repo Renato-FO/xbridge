@@ -3,26 +3,78 @@ import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { performance } from "node:perf_hooks";
 import { NodeHidDeviceProvider } from "../devices/node-hid-device-provider.js";
-import { controls, defaultMapping, validateMapping, type MonitorState } from "./contracts.js";
+import {
+  controls,
+  defaultMapping,
+  validateMapping,
+  type ControllerState,
+  type MonitorState,
+} from "./contracts.js";
 import { JoystickMonitor } from "../devices/joystick-monitor.js";
-import { mapPreview } from "../devices/windows-joystick.js";
+import { mapPreview, type JoystickInput } from "../devices/windows-joystick.js";
 import { OutputClient } from "../virtual-controller/output-client.js";
 import { toXboxReport } from "../virtual-controller/report.js";
 
+export type VirtualOutput = Pick<
+  OutputClient,
+  "status" | "error" | "userIndex" | "setInput" | "start" | "stop"
+>;
 export class DesktopService {
-  private readonly output = new OutputClient();
+  // One virtual Xbox controller per physical controller, keyed by Windows joystick ID.
+  private readonly outputs = new Map<number, VirtualOutput>();
+  private readonly retiring = new Set<Promise<void>>();
+  private inputs: readonly JoystickInput[] = [];
   private activeMapping = { ...defaultMapping };
-  private readonly joystick = new JoystickMonitor((input) => {
-    this.output.setInput(input ? toXboxReport(mapPreview(input, this.activeMapping)) : undefined);
+  private readonly joystick = new JoystickMonitor((inputs) => {
+    this.route(inputs);
   });
+  /** Feeds each controller's input to its own output; called on every monitor tick. */
+  route(inputs: readonly JoystickInput[]) {
+    this.inputs = inputs;
+    const outputRunning = [...this.outputs.values()].some((output) => output.status !== "stopped");
+    for (const [id, output] of this.outputs)
+      if (!inputs.some((controller) => controller.id === id)) {
+        this.outputs.delete(id);
+        output.setInput(undefined);
+        const stopped: Promise<void> = output.stop().finally(() => {
+          this.retiring.delete(stopped);
+        });
+        this.retiring.add(stopped);
+      }
+    for (const { id, input } of inputs) {
+      const report = toXboxReport(mapPreview(input, this.activeMapping));
+      const existing = this.outputs.get(id);
+      if (existing) {
+        existing.setInput(report);
+        continue;
+      }
+      const output = this.createOutput();
+      this.outputs.set(id, output);
+      output.setInput(report);
+      // A controller connected while Xbox output is running joins automatically.
+      if (outputRunning)
+        output.start().catch(() => {
+          // The failure is kept in output.error and shown for that controller.
+        });
+    }
+  }
   async startOutput() {
     this.activeMapping = await this.loadMapping();
-    const input = this.joystick.input;
-    this.output.setInput(input ? toXboxReport(mapPreview(input, this.activeMapping)) : undefined);
-    await this.output.start();
+    this.route(this.joystick.inputs);
+    if (this.outputs.size === 0)
+      throw new Error("Wake and connect the physical controller before starting Xbox output.");
+    const results = await Promise.allSettled(
+      [...this.outputs.values()].map((output) => output.start()),
+    );
+    const failure = results.find((result) => result.status === "rejected");
+    if (failure && results.every((result) => result.status === "rejected"))
+      throw failure.reason instanceof Error ? failure.reason : new Error(String(failure.reason));
   }
   async stopOutput() {
-    await this.output.stop();
+    await Promise.all([
+      ...[...this.outputs.values()].map((output) => output.stop()),
+      ...this.retiring,
+    ]);
   }
   private preview = { ...defaultMapping };
   previewMapping(value: unknown) {
@@ -43,17 +95,38 @@ export class DesktopService {
     capturing: false,
     captureResult: "",
   };
-  constructor(private readonly directory: string) {}
+  constructor(
+    private readonly directory: string,
+    private readonly createOutput: () => VirtualOutput = () => new OutputClient(),
+  ) {}
   snapshot(): MonitorState {
+    const controllers: ControllerState[] = this.inputs.map(({ id, input }) => {
+      const output = this.outputs.get(id);
+      return {
+        id,
+        input,
+        mappedInput: mapPreview(input, this.preview),
+        outputStatus: output?.status ?? "stopped",
+        outputError: output?.error ?? "",
+        ...(output?.userIndex !== undefined ? { userIndex: output.userIndex } : {}),
+      };
+    });
+    const statuses = controllers.map((controller) => controller.outputStatus);
+    const first = controllers[0];
     return {
       ...this.state,
       bytes: [...this.state.bytes],
-      input: this.joystick.input ?? {},
-      mappedInput: mapPreview(this.joystick.input ?? {}, this.preview),
-      inputAvailable: this.joystick.input !== undefined,
+      controllers,
+      input: first?.input ?? {},
+      mappedInput: first?.mappedInput ?? mapPreview({}, this.preview),
+      inputAvailable: first !== undefined,
       inputError: this.joystick.error,
-      outputStatus: this.output.status,
-      outputError: this.output.error,
+      outputStatus: statuses.includes("active")
+        ? "active"
+        : statuses.includes("starting")
+          ? "starting"
+          : "stopped",
+      outputError: controllers.find((controller) => controller.outputError)?.outputError ?? "",
     };
   }
   async connect(): Promise<void> {
@@ -66,9 +139,10 @@ export class DesktopService {
         (d) =>
           d.vendorId === 0x054c && d.productId === 0x05c4 && d.usagePage === 1 && d.usage === 5,
       );
+      // Raw HID capture is a diagnostic of the first controller; live input covers all of them.
       const device = devices[0];
-      if (devices.length !== 1 || !device?.path)
-        throw new Error("Connect exactly one 054C:05C4 controller and press PS, then retry.");
+      if (!device?.path)
+        throw new Error("Connect a 054C:05C4 controller and press PS, then retry.");
       const source = await HID.HIDAsync.open(device.path);
       if (generation !== this.generation) {
         await source.close();
@@ -110,8 +184,10 @@ export class DesktopService {
     }
   }
   async disconnect(): Promise<void> {
-    await this.output.stop();
+    await this.stopOutput();
     await this.joystick.stop();
+    this.route([]);
+    await Promise.all(this.retiring);
     this.generation++;
     const source = this.source;
     this.source = undefined;

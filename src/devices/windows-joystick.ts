@@ -57,6 +57,38 @@ export function decodeWindowsJoystick(value: unknown): ControlValues | undefined
   result["D-pad Left"] = [5, 6, 7].includes(direction) ? 1 : 0;
   return result;
 }
+export interface JoystickInput {
+  id: number;
+  input: ControlValues;
+}
+// Native monitor message: every connected 054C:05C4 joystick, keyed by its Windows joystick ID.
+export function decodeWindowsJoysticks(value: unknown): JoystickInput[] {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("controllers" in value) ||
+    !Array.isArray(value.controllers) ||
+    value.controllers.length > 16
+  )
+    throw new Error("Invalid joystick list.");
+  const result: JoystickInput[] = [];
+  for (const controller of value.controllers as unknown[]) {
+    if (
+      typeof controller !== "object" ||
+      controller === null ||
+      !("id" in controller) ||
+      typeof controller.id !== "number" ||
+      !Number.isInteger(controller.id) ||
+      controller.id < 0 ||
+      controller.id > 15 ||
+      result.some((other) => other.id === controller.id)
+    )
+      throw new Error("Invalid joystick ID.");
+    const input = decodeWindowsJoystick(controller);
+    if (input) result.push({ id: controller.id, input });
+  }
+  return result;
+}
 export function mapPreview(input: ControlValues, mapping: Mapping): ControlValues {
   const result: ControlValues = {};
   for (const [source, target] of Object.entries(mapping)) {

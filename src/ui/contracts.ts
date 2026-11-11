@@ -93,7 +93,18 @@ export function validateMapping(value: unknown): Mapping {
       throw new Error(`Invalid mapping for ${control}.`);
   return Object.fromEntries(controls.map((control) => [control, record[control]])) as Mapping;
 }
+export type OutputStatus = "stopped" | "starting" | "active";
+/** One connected physical controller and its own virtual Xbox output. */
+export interface ControllerState {
+  id: number;
+  input: ControlValues;
+  mappedInput: ControlValues;
+  outputStatus: OutputStatus;
+  outputError: string;
+  userIndex?: number;
+}
 export interface MonitorState {
+  controllers?: ControllerState[];
   connected: boolean;
   name: string;
   count: number;
@@ -105,7 +116,7 @@ export interface MonitorState {
   inputAvailable?: boolean;
   inputError?: string;
   mappedInput?: ControlValues;
-  outputStatus?: "stopped" | "starting" | "active";
+  outputStatus?: OutputStatus;
   outputError?: string;
 }
 export interface DesktopApi {

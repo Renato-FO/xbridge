@@ -20,7 +20,7 @@
     <main>
       <div class="page-heading">
         <div>
-          <p class="eyebrow">CONTROLLER / 01</p>
+          <p id="eyebrow" class="eyebrow">CONTROLLER / 01</p>
           <h1>Make every button yours.</h1>
           <p class="subtitle">
             Press a control to test it. Select a control to change its Xbox assignment.
@@ -28,11 +28,14 @@
         </div>
         <div class="connection">
           <span id="connection-dot"></span>
-          <div><strong>DualShock 4</strong><small id="status">Connecting…</small></div>
+          <div>
+            <strong id="controller-name">DualShock 4</strong><small id="status">Connecting…</small>
+          </div>
           <button id="connect">Reconnect</button
           ><button id="disconnect" class="quiet">Disconnect</button>
         </div>
       </div>
+      <nav id="controller-tabs" aria-label="Connected controllers" hidden></nav>
       <div id="notice" role="status" aria-live="polite"></div>
       <div class="workspace">
         <div class="visuals">

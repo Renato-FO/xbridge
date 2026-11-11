@@ -3,6 +3,7 @@ import {
   choices,
   defaultMapping,
   type Control,
+  type ControllerState,
   type ControlValues,
   type DesktopApi,
   type Mapping,
@@ -48,6 +49,60 @@ let group = "Buttons";
 let dirty = false;
 let available = false;
 let outputActive = false;
+// Windows joystick ID of the controller shown in the diagrams.
+let selectedController: number | undefined;
+let knownControllers: number[] | undefined;
+let tabsKey = "";
+// Tabs exist only while two or more controllers are connected.
+function renderControllerTabs(controllers: readonly ControllerState[]) {
+  const key = controllers
+    .map((c) => `${String(c.id)}:${c.outputStatus}:${String(c.userIndex ?? "")}`)
+    .join(",");
+  const tabs = element("controller-tabs");
+  tabs.hidden = controllers.length < 2;
+  if (key + String(selectedController) === tabsKey) return;
+  tabsKey = key + String(selectedController);
+  tabs.replaceChildren(
+    ...controllers.map((controller, index) => {
+      const button = document.createElement("button");
+      const current = controller.id === selectedController;
+      button.classList.toggle("current", current);
+      button.setAttribute("aria-pressed", String(current));
+      const dot = document.createElement("i");
+      dot.classList.toggle("output-on", controller.outputStatus === "active");
+      const label = document.createElement("span");
+      label.textContent = `Controller ${String(index + 1)}`;
+      const detail = document.createElement("small");
+      detail.textContent =
+        controller.outputStatus === "active"
+          ? controller.userIndex !== undefined
+            ? `Xbox P${String(controller.userIndex + 1)}`
+            : "Xbox on"
+          : controller.outputStatus === "starting"
+            ? "Starting…"
+            : "Xbox off";
+      button.append(dot, label, detail);
+      button.onclick = () => {
+        selectedController = controller.id;
+      };
+      return button;
+    }),
+  );
+}
+function announceControllers(controllers: readonly ControllerState[]) {
+  const ids = controllers.map((controller) => controller.id);
+  if (knownControllers) {
+    const joined = ids.filter((id) => !knownControllers?.includes(id));
+    const left = knownControllers.filter((id) => !ids.includes(id));
+    if (joined.length && ids.length > 1)
+      element("notice").textContent =
+        `Controller ${String(ids.indexOf(joined[0] ?? -1) + 1)} connected.` +
+        (outputActive ? " It joins Xbox output automatically." : "");
+    else if (left.length && knownControllers.length > 1)
+      element("notice").textContent = "A controller disconnected.";
+  }
+  knownControllers = ids;
+}
 element("output-toggle").onclick = () => {
   void action(() => (outputActive ? api.stopOutput() : api.startOutput()));
 };
@@ -231,10 +286,24 @@ element("save").onclick = () => {
 async function refresh() {
   try {
     const state = await api.state();
-    available = state.inputAvailable === true;
+    const controllers = state.controllers ?? [];
+    if (!controllers.some((controller) => controller.id === selectedController))
+      selectedController = controllers[0]?.id;
+    const position = controllers.findIndex((controller) => controller.id === selectedController);
+    const controller = controllers[position];
+    available = controller !== undefined;
     outputActive = state.outputStatus === "active";
+    announceControllers(controllers);
+    renderControllerTabs(controllers);
+    element("eyebrow").textContent =
+      `CONTROLLER / ${String(Math.max(position, 0) + 1).padStart(2, "0")}`;
+    element("controller-name").textContent =
+      controllers.length > 1 ? `${String(controllers.length)} × DualShock 4` : "DualShock 4";
+    const activeOutputs = controllers.filter((c) => c.outputStatus === "active").length;
     element("output-status").textContent = outputActive
-      ? "● Xbox output active"
+      ? controllers.length > 1
+        ? `● Xbox output active · ${String(activeOutputs)}/${String(controllers.length)}`
+        : "● Xbox output active"
       : state.outputStatus === "starting"
         ? "● Starting Xbox output…"
         : "● Xbox output stopped";
@@ -242,9 +311,10 @@ async function refresh() {
     element("output-toggle").textContent = outputActive ? "Stop Xbox output" : "Start Xbox output";
     element<HTMLButtonElement>("output-toggle").disabled =
       state.outputStatus === "starting" || (!available && !outputActive);
+    const outputError = controller?.outputError ?? state.outputError;
     element("output-detail").textContent =
-      state.outputError !== undefined && state.outputError !== ""
-        ? state.outputError
+      outputError !== undefined && outputError !== ""
+        ? outputError
         : outputActive
           ? "Games receive your saved layout. Unsaved edits only change the preview."
           : "Creates a virtual Xbox 360 controller for games using your saved layout.";
@@ -264,8 +334,8 @@ async function refresh() {
     if (state.inputError) element("notice").textContent = state.inputError;
     else if (state.error) element("notice").textContent = state.error;
     if (state.captureResult) element("capture-result").textContent = state.captureResult;
-    const input = available ? (state.input ?? {}) : {},
-      mapped = available ? (state.mappedInput ?? {}) : {};
+    const input = controller?.input ?? {},
+      mapped = controller?.mappedInput ?? {};
     draw("physical", input);
     draw("xbox", mapped);
     element("physical-active").textContent = available

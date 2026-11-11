@@ -33,22 +33,21 @@ internal static class JoystickMonitor
         _ = Task.Run(async () => { await Console.In.ReadLineAsync(); cancellation.Cancel(); });
         while (!cancellation.IsCancellationRequested)
         {
-            var found = false;
+            // Every matching joystick is reported; the Windows joystick ID is stable while connected.
+            var controllers = new List<object>();
             for (uint id = 0; id < 16; id++)
             {
                 if (GetCaps(id, out var caps, (uint)Marshal.SizeOf<Caps>()) != 0 || caps.Mid != 0x054c || caps.Pid != 0x05c4) continue;
                 var position = new Position { Size = (uint)Marshal.SizeOf<Position>(), Flags = 0xff };
                 if (GetPosition(id, ref position) != 0) continue;
                 double Axis(uint value, uint min, uint max) => max > min ? Math.Clamp((double)(value - (double)min) / (max - min), 0, 1) : 0.5;
-                Console.WriteLine(JsonSerializer.Serialize(new { connected = true, buttons = position.Buttons, pov = position.Pov,
+                controllers.Add(new { id, connected = true, buttons = position.Buttons, pov = position.Pov,
                     axes = new[] { Axis(position.X, caps.XMin, caps.XMax), Axis(position.Y, caps.YMin, caps.YMax),
                         Axis(position.Z, caps.ZMin, caps.ZMax), Axis(position.R, caps.RMin, caps.RMax),
-                        Axis(position.U, caps.UMin, caps.UMax), Axis(position.V, caps.VMin, caps.VMax) } }));
-                found = true;
-                break;
+                        Axis(position.U, caps.UMin, caps.UMax), Axis(position.V, caps.VMin, caps.VMax) } });
             }
-            if (!found) Console.WriteLine("{\"connected\":false}");
-            try { await Task.Delay(found ? 16 : 1000, cancellation.Token); }
+            Console.WriteLine(JsonSerializer.Serialize(new { controllers }));
+            try { await Task.Delay(controllers.Count > 0 ? 16 : 1000, cancellation.Token); }
             catch (OperationCanceledException) { break; }
         }
         return 0;
