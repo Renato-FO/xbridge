@@ -242,6 +242,11 @@ select option {
   background: #2b3540;
   flex: none;
 }
+/* Trim the glyph box to the capital height so the grid centres the letter exactly. */
+.badge > span {
+  display: block;
+  text-box: trim-both cap alphabetic;
+}
 .badge.big {
   min-width: 38px;
   height: 38px;

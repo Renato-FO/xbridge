@@ -142,7 +142,10 @@ function setBadge(node: HTMLElement, output: string) {
   ]
     .filter(Boolean)
     .join(" ");
-  node.textContent = outputBadges[output] ?? output;
+  // The glyph sits in its own block so CSS can trim it to cap height and centre it exactly.
+  const glyph = document.createElement("span");
+  glyph.textContent = outputBadges[output] ?? output;
+  node.replaceChildren(glyph);
 }
 function badge(output: string): HTMLSpanElement {
   const node = document.createElement("span");
