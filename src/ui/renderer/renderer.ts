@@ -422,7 +422,10 @@ function draw(side: ArtKind, values: ControlValues) {
 function drawStick(id: string, values: ControlValues, prefix: string) {
   const x = values[`${prefix} X`] ?? 0,
     y = values[`${prefix} Y`] ?? 0;
-  element(`${id}-dot`).style.transform = `translate(${String(x * 32)}px, ${String(y * 32)}px)`;
+  const dot = element(`${id}-dot`);
+  // Travel follows the pad size, which shrinks on short windows.
+  const travel = Math.max(0, (dot.parentElement?.clientWidth ?? 76) / 2 - 6);
+  dot.style.transform = `translate(${String(x * travel)}px, ${String(y * travel)}px)`;
   element(`${id}-value`).textContent = `X: ${percent(x)}   Y: ${percent(y)}`;
 }
 function drawBar(id: string, value: number) {

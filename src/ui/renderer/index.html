@@ -57,6 +57,13 @@
           <h1>Seu controle. Do seu jeito.</h1>
           <p class="subtitle">Conecte, personalize e jogue.</p>
         </div>
+        <!-- Shown only while two or more controllers are connected. -->
+        <nav
+          id="controller-tabs"
+          class="controller-tabs"
+          aria-label="Controles conectados"
+          hidden
+        ></nav>
         <div class="profile-picker" title="Múltiplos perfis chegam em breve">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
             <path d="m12 3 9 5-9 5-9-5 9-5ZM3 13l9 5 9-5M3 17l9 5 9-5" />
@@ -110,14 +117,6 @@
           <span id="output-toggle-label">Ativar saída Xbox</span>
         </button>
       </section>
-
-      <!-- Shown only while two or more controllers are connected. -->
-      <nav
-        id="controller-tabs"
-        class="controller-tabs"
-        aria-label="Controles conectados"
-        hidden
-      ></nav>
 
       <div id="notice" role="status" aria-live="polite"></div>
 
