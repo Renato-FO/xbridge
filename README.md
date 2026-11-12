@@ -67,7 +67,7 @@ See [virtual output verification](docs/virtual-output.md#verification) for the h
 - `XBridge-<version>-x64.exe`: installer with Start-menu and desktop shortcuts.
 - `XBridge-<version>-portable.exe`: a single executable that runs without installing.
 
-The .NET bridge is published self-contained, so end users need no .NET runtime. They still need the [ViGEmBus](https://github.com/nefarius/ViGEmBus/releases) driver for Xbox output. Builds are unsigned, so Windows SmartScreen warns on first launch. `npm run package:dir` produces just the unpacked app in `release/win-unpacked/` for a quick test. After editing `build/icon.svg`, run `npm run build:icons` to regenerate `build/icon.ico` and `build/icon.png`.
+The .NET bridge is published self-contained, so end users need no .NET runtime. The installer runs as administrator and silently installs the [ViGEmBus](https://github.com/nefarius/ViGEmBus) and [HidHide](https://github.com/nefarius/HidHide) drivers when they are missing; `npm run fetch:drivers` downloads their official installers into `build/drivers/`, pinned by SHA-256. The portable build does not install drivers. Builds are unsigned, so Windows SmartScreen warns on first launch. `npm run package:dir` produces just the unpacked app in `release/win-unpacked/` for a quick test. After editing `build/icon.svg`, run `npm run build:icons` to regenerate `build/icon.ico` and `build/icon.png`.
 
 XBridge requires Windows APIs and local device access, so GitHub Pages cannot host the application. Use the quick start to run it locally.
 

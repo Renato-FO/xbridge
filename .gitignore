@@ -21,3 +21,4 @@ tasks.md
 .codex*
 
 release/
+build/drivers/

@@ -20,9 +20,10 @@
     "capture": "tsx src/cli/capture.ts",
     "electron": "npm run build:native && npm run build && electron .",
     "build:native:package": "dotnet publish native/XBridge.VirtualController -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o artifacts/package-native",
-    "package": "npm run build:native:package && npm run build && electron-builder --win nsis portable",
+    "package": "npm run build:native:package && npm run build && npm run fetch:drivers && electron-builder --win nsis portable",
     "package:dir": "npm run build:native:package && npm run build && electron-builder --win dir",
-    "build:icons": "electron scripts/build-icons.cjs"
+    "build:icons": "electron scripts/build-icons.cjs",
+    "fetch:drivers": "node scripts/fetch-drivers.mjs"
   },
   "main": "dist/ui/main.js",
   "dependencies": {
@@ -79,12 +80,13 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "perMachine": false,
+      "perMachine": true,
       "createDesktopShortcut": true,
       "shortcutName": "XBridge",
       "installerIcon": "build/icon.ico",
       "uninstallerIcon": "build/icon.ico",
-      "installerHeaderIcon": "build/icon.ico"
+      "installerHeaderIcon": "build/icon.ico",
+      "include": "build/installer.nsh"
     }
   }
 }
