@@ -1,6 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
-import { fileURLToPath } from "node:url";
+import { nativeExecutable } from "../native/executable.js";
 import type { XboxReport } from "./report.js";
 
 export class OutputClient {
@@ -38,9 +38,7 @@ export class OutputClient {
     this.error = "";
     this.sent = "";
     const generation = ++this.generation;
-    const executable = fileURLToPath(
-      new URL("../../artifacts/native-output/XBridge.VirtualController.exe", import.meta.url),
-    );
+    const executable = nativeExecutable("native-output");
     const child = spawn(executable, [this.fake ? "--output-fake" : "--output"], {
       windowsHide: true,
       stdio: "pipe",

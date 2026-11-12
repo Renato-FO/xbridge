@@ -22,6 +22,8 @@ function createWindow(): BrowserWindow {
     minWidth: 360,
     minHeight: 480,
     show: false,
+    icon: fileURLToPath(new URL("./icon.png", import.meta.url)),
+    backgroundColor: "#0a0d11",
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,

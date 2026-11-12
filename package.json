@@ -18,7 +18,11 @@
     "format:check": "prettier --check .",
     "diagnostics": "tsx src/cli/diagnostics.ts",
     "capture": "tsx src/cli/capture.ts",
-    "electron": "npm run build:native && npm run build && electron ."
+    "electron": "npm run build:native && npm run build && electron .",
+    "build:native:package": "dotnet publish native/XBridge.VirtualController -c Release -r win-x64 --self-contained -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o artifacts/package-native",
+    "package": "npm run build:native:package && npm run build && electron-builder --win nsis portable",
+    "package:dir": "npm run build:native:package && npm run build && electron-builder --win dir",
+    "build:icons": "electron scripts/build-icons.cjs"
   },
   "main": "dist/ui/main.js",
   "dependencies": {
@@ -29,11 +33,58 @@
     "@types/node": "^24.3.1",
     "@vitest/coverage-v8": "^3.2.4",
     "electron": "^44.2.0",
+    "electron-builder": "^26.18.0",
     "eslint": "^9.35.0",
     "prettier": "^3.6.2",
     "tsx": "^4.20.5",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.42.0",
     "vitest": "^3.2.4"
+  },
+  "author": "Renato Ordonho",
+  "build": {
+    "appId": "com.xbridge.app",
+    "productName": "XBridge",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "dist/**/*",
+      "!dist/**/*.map",
+      "!dist/**/*.d.ts",
+      "!dist/cli/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "artifacts/package-native",
+        "to": "native",
+        "filter": [
+          "XBridge.VirtualController.exe"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "artifactName": "${productName}-${version}-${arch}.${ext}",
+      "icon": "build/icon.ico"
+    },
+    "portable": {
+      "artifactName": "${productName}-${version}-portable.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "shortcutName": "XBridge",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico"
+    }
   }
 }

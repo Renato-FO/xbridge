@@ -8,11 +8,17 @@
       content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'"
     />
     <title>XBridge</title>
+    <link rel="icon" type="image/svg+xml" href="./icon.svg" />
     <link rel="stylesheet" href="./style.css" />
   </head>
   <body data-view="controller" data-mode="map">
     <header class="topbar">
-      <div class="brand"><span class="brand-icon">X</span>XBridge</div>
+      <div class="brand">
+        <span class="brand-icon"
+          ><svg viewBox="0 0 256 256" aria-hidden="true">
+            <path d="M82 76 174 180M174 76 82 180" /></svg></span
+        >XBridge
+      </div>
       <nav class="main-nav" aria-label="Seções">
         <button class="nav-item current" data-view-target="controller" aria-pressed="true">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">

@@ -23,3 +23,5 @@ const html = (await readFile("src/ui/renderer/index.html", "utf8"))
   .replace("<!--art:xbox-->", await inlineArt("src/ui/renderer/art/xbox-series.svg", "xbx"));
 await writeFile("dist/ui/renderer/index.html", html);
 await cp("src/ui/renderer/style.css", "dist/ui/renderer/style.css");
+await cp("build/icon.svg", "dist/ui/renderer/icon.svg");
+await cp("build/icon.png", "dist/ui/icon.png");

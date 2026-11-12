@@ -339,10 +339,16 @@ select option {
   width: 34px;
   height: 34px;
   border-radius: 8px;
-  background: var(--accent);
+  background: linear-gradient(#c8f560, #9ad42a);
   color: var(--accent-ink);
-  font-size: 22px;
-  font-weight: 800;
+}
+.brand-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 32;
+  stroke-linecap: round;
 }
 .main-nav {
   display: flex;
@@ -1410,7 +1416,6 @@ body[data-mode="test"] .only-map {
   .brand-icon {
     width: 30px;
     height: 30px;
-    font-size: 19px;
   }
   .main-nav {
     order: 3;

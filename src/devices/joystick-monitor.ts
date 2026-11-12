@@ -1,6 +1,6 @@
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 import { createInterface } from "node:readline";
-import { fileURLToPath } from "node:url";
+import { nativeExecutable } from "../native/executable.js";
 import { decodeWindowsJoysticks, type JoystickInput } from "./windows-joystick.js";
 import type { ControlValues } from "../ui/contracts.js";
 export class JoystickMonitor {
@@ -19,9 +19,7 @@ export class JoystickMonitor {
   }
   start() {
     if (this.child) return;
-    const executable = fileURLToPath(
-      new URL("../../artifacts/native/XBridge.VirtualController.exe", import.meta.url),
-    );
+    const executable = nativeExecutable("native");
     const child = spawn(executable, ["--monitor-joystick"], { windowsHide: true, stdio: "pipe" });
     this.child = child;
     child.on("error", () => {

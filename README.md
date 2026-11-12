@@ -62,7 +62,12 @@ See [virtual output verification](docs/virtual-output.md#verification) for the h
 
 ## Distribution
 
-The repository currently provides a source-build workflow. Installer packaging and automated GitHub Releases are not configured. `npm run build` produces compiled desktop files, and `npm run build:native` produces native bridge artifacts; these outputs are not a standalone installer.
+`npm run package` builds a Windows installer and a portable executable in `release/`:
+
+- `XBridge-<version>-x64.exe`: installer with Start-menu and desktop shortcuts.
+- `XBridge-<version>-portable.exe`: a single executable that runs without installing.
+
+The .NET bridge is published self-contained, so end users need no .NET runtime. They still need the [ViGEmBus](https://github.com/nefarius/ViGEmBus/releases) driver for Xbox output. Builds are unsigned, so Windows SmartScreen warns on first launch. `npm run package:dir` produces just the unpacked app in `release/win-unpacked/` for a quick test. After editing `build/icon.svg`, run `npm run build:icons` to regenerate `build/icon.ico` and `build/icon.png`.
 
 XBridge requires Windows APIs and local device access, so GitHub Pages cannot host the application. Use the quick start to run it locally.
 

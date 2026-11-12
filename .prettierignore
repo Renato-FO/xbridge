@@ -6,3 +6,4 @@ native/**/obj/
 package-lock.json
 codex.md
 src/ui/renderer/art/
+release/
