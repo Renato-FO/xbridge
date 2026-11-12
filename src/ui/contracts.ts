@@ -103,7 +103,15 @@ export interface ControllerState {
   outputError: string;
   userIndex?: number;
 }
+export type IsolationStatus = "unavailable" | "off" | "active" | "failed";
+/** Whether the physical controller is hidden from games (HidHide), apart from output status. */
+export interface IsolationState {
+  status: IsolationStatus;
+  hidden: number;
+  detail: string;
+}
 export interface MonitorState {
+  isolation?: IsolationState;
   controllers?: ControllerState[];
   connected: boolean;
   name: string;

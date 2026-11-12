@@ -13,6 +13,7 @@ import {
 import { JoystickMonitor } from "../devices/joystick-monitor.js";
 import { mapPreview, type JoystickInput } from "../devices/windows-joystick.js";
 import { OutputClient } from "../virtual-controller/output-client.js";
+import { InputIsolation } from "../isolation/hidhide.js";
 import { toXboxReport } from "../virtual-controller/report.js";
 
 export type VirtualOutput = Pick<
@@ -53,10 +54,36 @@ export class DesktopService {
       output.setInput(report);
       // A controller connected while Xbox output is running joins automatically.
       if (outputRunning)
-        output.start().catch(() => {
-          // The failure is kept in output.error and shown for that controller.
-        });
+        output.start().then(
+          () => this.isolate(),
+          () => {
+            // The failure is kept in output.error and shown for that controller.
+          },
+        );
     }
+    // Every controller left: give the physical devices back instead of hiding them idle.
+    if (outputRunning && this.outputs.size === 0 && this.isolation.active)
+      void this.isolation.release();
+  }
+  /**
+   * Hide the physical controllers from games once their virtual Xbox is live, then confirm
+   * XBridge itself can still read them; if not, undo it so the controller is never lost.
+   */
+  private async isolate(): Promise<void> {
+    if (![...this.outputs.values()].some((output) => output.status === "active")) return;
+    const readable = this.inputs.length;
+    const state = await this.isolation.acquire();
+    if (state.status !== "active") return;
+    await new Promise((resolve) => setTimeout(resolve, this.verifyDelayMs));
+    if (this.inputs.length < readable)
+      await this.isolation.release(
+        "O XBridge perdeu acesso ao controle ao ocultá-lo, então a ocultação foi desfeita.",
+        "failed",
+      );
+  }
+  /** Undo hiding left behind by a previous run that crashed. */
+  recoverIsolation(): Promise<void> {
+    return this.isolation.recover();
   }
   async startOutput() {
     this.activeMapping = await this.loadMapping();
@@ -69,12 +96,14 @@ export class DesktopService {
     const failure = results.find((result) => result.status === "rejected");
     if (failure && results.every((result) => result.status === "rejected"))
       throw failure.reason instanceof Error ? failure.reason : new Error(String(failure.reason));
+    await this.isolate();
   }
   async stopOutput() {
     await Promise.all([
       ...[...this.outputs.values()].map((output) => output.stop()),
       ...this.retiring,
     ]);
+    await this.isolation.release();
   }
   private preview = { ...defaultMapping };
   previewMapping(value: unknown) {
@@ -98,6 +127,12 @@ export class DesktopService {
   constructor(
     private readonly directory: string,
     private readonly createOutput: () => VirtualOutput = () => new OutputClient(),
+    private readonly isolation = new InputIsolation(
+      undefined,
+      [],
+      join(directory, "isolation.json"),
+    ),
+    private readonly verifyDelayMs = 1500,
   ) {}
   snapshot(): MonitorState {
     const controllers: ControllerState[] = this.inputs.map(({ id, input }) => {
@@ -127,6 +162,7 @@ export class DesktopService {
           ? "starting"
           : "stopped",
       outputError: controllers.find((controller) => controller.outputError)?.outputError ?? "",
+      isolation: this.isolation.current,
     };
   }
   async connect(): Promise<void> {

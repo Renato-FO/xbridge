@@ -111,9 +111,11 @@
               >Cria um controle Xbox 360 virtual para os jogos usando o perfil salvo.</small
             >
           </div>
-          <span id="output-status" class="pill">Saída desativada</span>
-          <!-- Reserved for HidHide input isolation status (see docs/input-isolation.md). -->
-          <span id="isolation-status" class="pill" hidden></span>
+          <div class="output-pills">
+            <span id="output-status" class="pill">Saída desativada</span>
+            <!-- HidHide input isolation status (see docs/input-isolation.md). -->
+            <span id="isolation-status" class="pill" hidden></span>
+          </div>
         </div>
         <button id="output-toggle" class="primary output-button">
           <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">

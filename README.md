@@ -35,7 +35,7 @@ Click **Stop Xbox output** to remove the virtual controller. Closing the window 
 - Git for cloning the repository
 - [ViGEmBus](https://github.com/nefarius/ViGEmBus) installed separately for virtual Xbox output
 
-ViGEmBus is not required for diagnostics or the live tester. It is discontinued, and XBridge isolates its output backend to allow future replacement. XBridge does not install or configure drivers or change HidHide settings.
+ViGEmBus is not required for diagnostics or the live tester. It is discontinued, and XBridge isolates its output backend to allow future replacement. The Windows installer installs ViGEmBus and HidHide when missing; source builds need them installed separately.
 
 ## Development
 
@@ -106,9 +106,9 @@ Some HID metadata, including report sizes and report descriptors, is not exposed
 
 ## Current scope
 
-Exclusive Xbox input is a final-release requirement: see [input isolation setup, recovery, and acceptance](docs/input-isolation.md) and `codex.md`. Guided HidHide installation and automatic hiding lifecycle are not implemented in the app yet; installing the driver alone does not complete this feature.
+While Xbox output is active, XBridge uses HidHide (when installed) to hide the physical DualShock 4 from games, so they see only the virtual Xbox controller. Only XBridge's own readers stay allowed. Stopping output, unplugging every controller, disconnecting, or exiting un-hides it, and a crash is undone on the next start. See [input isolation](docs/input-isolation.md). Gameplay acceptance is still pending.
 
-XBridge provides a live controller tester, saved mappings, raw capture, and real virtual Xbox 360 output through an already-installed ViGEmBus driver. It does not change HidHide settings or install drivers. See [virtual output](docs/virtual-output.md) for operation, verification, and remaining limitations.
+XBridge provides a live controller tester, saved mappings, raw capture, real virtual Xbox 360 output through ViGEmBus, and HidHide input isolation while output runs. See [virtual output](docs/virtual-output.md) for operation, verification, and remaining limitations.
 
 ## Raw controller capture
 

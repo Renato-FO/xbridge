@@ -11,7 +11,7 @@ The client library is MIT-licensed, copyright Nefarius Software Solutions e.U. 2
 3. Click **Start Xbox output** in the header. Wait for **Xbox output active**, then open an XInput game.
 4. Click **Stop Xbox output** to remove the virtual controller. Disconnecting the source or exiting also stops output. After a disconnect, reconnect and explicitly start output again.
 
-The physical controller remains visible because HidHide is not configured. A game that reads both devices can receive duplicate input; select the Xbox device where the game supports choosing one. Rumble forwarding, automatic output restart, two-controller support, calibration, and a HidHide setup flow remain pending. Windows joystick input is currently sampled at about 16 ms; the less-than-5-ms latency target has not been met or benchmarked.
+With HidHide installed, the physical controller is hidden from games while output runs (see [input isolation](input-isolation.md)); without it, a game that reads both devices can receive duplicate input. Rumble forwarding, automatic output restart, and calibration remain pending. Windows joystick input is currently sampled at about 16 ms; the less-than-5-ms latency target has not been met or benchmarked.
 
 The drawings preview current edits. Games receive the last saved layout; saving while output is active applies the updated layout on the next input event. Y axes are inverted when converted to XInput's positive-up coordinate system. Trigger values are scaled to 0–255, stick axes to signed 16-bit values, and buttons to the Xbox mask.
 

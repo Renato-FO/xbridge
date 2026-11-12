@@ -582,13 +582,34 @@ function renderStatus(state: MonitorState, controller: ControllerState | undefin
     ? "Desativar saída"
     : "Ativar saída Xbox";
   toggle.disabled = starting || (!available && !outputActive);
+  const isolation = state.isolation;
+  const isolationPill = element("isolation-status");
+  const isolationShown = outputActive && isolation !== undefined && isolation.status !== "off";
+  isolationPill.hidden = !isolationShown;
+  if (isolation && isolationShown) {
+    isolationPill.textContent =
+      isolation.status === "active"
+        ? "Controle físico oculto"
+        : isolation.status === "failed"
+          ? "Ocultação falhou"
+          : "Sem HidHide";
+    isolationPill.className = `pill${isolation.status === "active" ? " on" : isolation.status === "failed" ? " error" : " warn"}`;
+    isolationPill.title = isolation.detail;
+  }
+  const isolationProblem =
+    isolationShown && isolation.status !== "active" && isolation.detail !== "";
   const detail = element("output-detail");
   detail.textContent = outputError
     ? errorText
-    : outputActive
-      ? "Os jogos recebem o perfil salvo. Edições não salvas só mudam a prévia."
-      : "Cria um controle Xbox 360 virtual para os jogos usando o perfil salvo.";
-  detail.classList.toggle("error", outputError);
+    : isolationProblem
+      ? `${isolation.detail} Os jogos podem ver o controle duas vezes.`
+      : outputActive
+        ? isolation?.status === "active"
+          ? `Os jogos veem só o Xbox virtual. ${isolation.detail.includes("reinicie") ? "Se um jogo já estava aberto, reinicie-o." : "Edições não salvas só mudam a prévia."}`
+          : "Os jogos recebem o perfil salvo. Edições não salvas só mudam a prévia."
+        : "Cria um controle Xbox 360 virtual para os jogos usando o perfil salvo.";
+  detail.classList.toggle("error", outputError || isolationProblem);
+  detail.title = detail.textContent;
   element("layout-hint").textContent =
     dirty && outputActive
       ? "Salve para aplicar as alterações aos jogos."

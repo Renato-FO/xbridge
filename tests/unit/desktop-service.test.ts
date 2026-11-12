@@ -1,7 +1,8 @@
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { expect, it } from "vitest";
+import { expect, it, vi } from "vitest";
+import type { InputIsolation } from "../../src/isolation/hidhide.js";
 import { DesktopService, type VirtualOutput } from "../../src/ui/desktop-service.js";
 import { defaultMapping } from "../../src/ui/contracts.js";
 it("persists mappings and rejects corrupt files instead of applying them", async () => {
@@ -85,6 +86,56 @@ it("gives each connected controller its own Xbox output and adds late joiners", 
     expect(service.snapshot().controllers).toHaveLength(1);
     await service.stopOutput();
     expect(service.snapshot().outputStatus).toBe("stopped");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+it("hides physical controllers while output runs and gives them back afterwards", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "xbridge-test-"));
+  try {
+    const calls: string[] = [];
+    let active = false;
+    const isolation = {
+      get active() {
+        return active;
+      },
+      current: { status: "off", hidden: 0, detail: "" },
+      acquire() {
+        calls.push("acquire");
+        active = true;
+        return Promise.resolve({ status: "active", hidden: 1, detail: "" });
+      },
+      release() {
+        calls.push("release");
+        active = false;
+        return Promise.resolve({ status: "off", hidden: 0, detail: "" });
+      },
+      recover: () => Promise.resolve(),
+    } as unknown as InputIsolation;
+    const created: FakeOutput[] = [];
+    const service = new DesktopService(
+      directory,
+      () => {
+        const output = new FakeOutput();
+        created.push(output);
+        return output;
+      },
+      isolation,
+      0,
+    );
+    const first = { id: 0, input: { Cross: 1 } };
+    service.route([first]);
+    await created[0]?.start();
+    // A late joiner starts its output and is then hidden from games too.
+    service.route([first, { id: 1, input: {} }]);
+    await vi.waitFor(() => {
+      expect(calls).toEqual(["acquire"]);
+    });
+    // Every controller unplugged: nothing is left hidden.
+    service.route([]);
+    expect(calls).toEqual(["acquire", "release"]);
+    await service.stopOutput();
+    expect(calls.at(-1)).toBe("release");
   } finally {
     await rm(directory, { recursive: true, force: true });
   }

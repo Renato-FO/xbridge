@@ -538,7 +538,13 @@ h3 {
 .virtual-text {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-width: 160px;
+  flex: 1 1 auto;
+}
+.output-pills {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .virtual-text small {
   font-size: 11.5px;
@@ -551,6 +557,11 @@ h3 {
 .virtual-text small.error {
   color: var(--danger);
   white-space: normal;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-height: 1.2;
+  line-clamp: 2;
 }
 .output-button {
   margin-left: auto;
@@ -1343,6 +1354,16 @@ body[data-mode="test"] .only-map {
   }
 }
 @media (max-width: 1100px) {
+  .virtual-text small.error {
+    display: block;
+  }
+  .output-pills {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+}
+@media (max-width: 1100px) {
   body[data-view="controller"] .view-controller,
   .workspace,
   .stage {
@@ -1716,6 +1737,10 @@ body[data-mode="test"] .only-map {
   }
 }
 @media (max-height: 760px) and (min-width: 1101px) {
+  .virtual-text small.error {
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+  }
   .subtitle {
     display: none;
   }

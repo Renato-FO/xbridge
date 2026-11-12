@@ -1,6 +1,16 @@
 # Exclusive Xbox input (release requirement)
 
-Status: specified; application integration and gameplay acceptance pending.
+Status: implemented in the app (`src/isolation/hidhide.ts`); gameplay acceptance pending.
+
+## How XBridge applies it
+
+- After Xbox output starts and the virtual controller is active, XBridge reads the HidHide configuration through `HidHideCLI.exe`. If inverse mode is on, it changes nothing and reports a failure.
+- It allows its own readers (the Electron executable and the native joystick reader) and hides every present `054C:05C4` interface that is not hidden yet. It turns cloaking on only if it was off.
+- About 1.5 s later it checks that it still receives the controllers. If not, it undoes the hiding.
+- A controller connected while output runs is hidden as soon as its output starts.
+- Stopping output, unplugging every controller, disconnecting, or exiting un-hides only the entries XBridge added. Cloaking goes back off only if XBridge turned it on and no other device remains hidden. Allowed-application entries are left in place.
+- Owned changes are written to `isolation.json` in the app data folder before they are applied. The next start undoes anything left over from a crash.
+- The output card shows the isolation status: _Controle físico oculto_, _Ocultação falhou_, or _Sem HidHide_.
 
 The final release must guide users through installing HidHide from the official Nefarius release, with a verified Authenticode signature and explicit consent for administrative changes. The setup must explain any required controller reconnection, game restart, or Windows restart. Never reboot automatically.
 

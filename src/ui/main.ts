@@ -1,6 +1,10 @@
 import { app, BrowserWindow, ipcMain, Menu, nativeImage, Tray } from "electron";
 import { DesktopService } from "./desktop-service.js";
 import { fileURLToPath } from "node:url";
+import { join } from "node:path";
+import { InputIsolation, cliRunner, defaultHidHideCli } from "../isolation/hidhide.js";
+import { nativeExecutable } from "../native/executable.js";
+import { OutputClient } from "../virtual-controller/output-client.js";
 
 let mainWindow: BrowserWindow | undefined;
 let tray: Tray | undefined;
@@ -74,7 +78,19 @@ function createTray(): Tray {
 
 void app.whenReady().then(() => {
   if (!primaryInstance) return;
-  service = new DesktopService(app.getPath("userData"));
+  const directory = app.getPath("userData");
+  const cli = defaultHidHideCli();
+  // Only XBridge's own readers may still see the hidden controller: Electron (raw HID capture)
+  // and the native joystick reader.
+  const isolation = new InputIsolation(
+    cli ? cliRunner(cli) : undefined,
+    [process.execPath, nativeExecutable("native")],
+    join(directory, "isolation.json"),
+  );
+  service = new DesktopService(directory, () => new OutputClient(), isolation);
+  void service.recoverIsolation().catch((error: unknown) => {
+    console.error(error);
+  });
   const handlers: Record<string, (value: unknown) => unknown> = {
     connect: () => service?.connect(),
     disconnect: () => service?.disconnect(),
